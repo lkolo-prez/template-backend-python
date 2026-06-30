@@ -1,0 +1,44 @@
+---
+description: Core project conventions for the aircloud FastAPI microservice template.
+globs:
+  - "src/**/*.py"
+  - "tests/**/*.py"
+alwaysApply: true
+---
+
+# Project rules: template-backend-python
+
+Production-grade FastAPI HTTP microservice. Python 3.12, async-first, managed
+with **uv**. Source in `src/app/`, tests in `tests/`.
+
+## Always
+
+- Annotate all code; it must pass `mypy --strict`. Avoid `Any`.
+- Use Pydantic v2 models for I/O; input models set
+  `model_config = ConfigDict(extra="forbid")`.
+- Log via structlog: `from app.logging import get_logger` then
+  `log = get_logger(__name__)`. Emit structured key-value events.
+- Read config only through `app.config.get_settings()` (env prefix `APP_`).
+- Raise domain errors from `app.exceptions` (`NotFoundError`, `ConflictError`,
+  `AppError`); they render as RFC 9457 `problem+json`.
+- Async I/O: `async def` handlers, `httpx.AsyncClient`, async tests.
+- New endpoints live under a versioned router (`src/app/api/v1/`) with models,
+  router, and unit + integration tests.
+
+## Never
+
+- Never use `print` or the stdlib `logging` module directly.
+- Never read `os.environ` directly outside `config.py`.
+- Never return raw 500 responses exposing internal details.
+- Never hand-edit `uv.lock` (change `pyproject.toml`, run `uv lock`).
+- Never add long-lived secrets; cloud auth is GitHub OIDC, signing is cosign.
+- Never unpin GitHub Actions (they are pinned to full commit SHAs).
+
+## Commands
+
+`task lint` · `task format` · `task typecheck` · `task test` · `task security`
+· `task all` (full local gate). Use `uv run <tool>` if Task is unavailable.
+
+## Commits
+
+Conventional Commits, signed (verified). PR titles follow the same convention.

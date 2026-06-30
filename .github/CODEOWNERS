@@ -1,0 +1,19 @@
+# CODEOWNERS — required reviewers enforced by the branch ruleset.
+# Order matters: the last matching pattern wins. Teams must have write access.
+
+# Default owners for everything in the repo.
+*                           @aircloud/platform-team
+
+# CI / CD and supply-chain config require platform + security sign-off.
+/.github/                   @aircloud/platform-team @aircloud/security
+/.github/workflows/         @aircloud/platform-team @aircloud/security
+/Dockerfile                 @aircloud/platform-team @aircloud/security
+/release-please-config.json @aircloud/platform-team
+
+# Application source.
+/src/                       @aircloud/backend-team
+/tests/                     @aircloud/backend-team
+
+# Security-sensitive docs.
+/SECURITY.md                @aircloud/security
+/docs/BRANCH-PROTECTION.md  @aircloud/security @aircloud/platform-team

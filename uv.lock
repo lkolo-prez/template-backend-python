@@ -1,0 +1,17 @@
+# NOTE: This is a small PLACEHOLDER lockfile so the template is committable
+# without a network round-trip. Regenerate the real, fully-resolved lockfile
+# (with hashes for every transitive dependency) before first use:
+#
+#     uv lock
+#
+# CI installs strictly from the lockfile via `uv sync --frozen --all-groups`.
+# A drifted lockfile will fail CI, which is intentional: the lock is the source
+# of truth for reproducible, supply-chain-verified builds.
+#
+# Do not hand-edit dependency versions here; edit pyproject.toml and run
+# `uv lock` to regenerate.
+
+version = 1
+requires-python = ">=3.12"
+
+# <-- placeholder; `uv lock` populates [[package]] tables with hashes -->

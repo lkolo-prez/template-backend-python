@@ -1,0 +1,15 @@
+# hadolint configuration for the Dockerfile.
+# Docs: https://github.com/hadolint/hadolint
+failure-threshold: warning
+
+trustedRegistries:
+  - ghcr.io
+  - gcr.io
+  - docker.io
+  - mcr.microsoft.com
+
+# The distroless runtime stage has no shell/apt, so pinning OS packages does not
+# apply there. We pin via uv.lock instead of apt in this image.
+ignored:
+  - DL3008  # apt version pinning — not used; no apt in build/runtime stages
+  - DL3059  # multiple consecutive RUN — intentional for cache-friendly layers

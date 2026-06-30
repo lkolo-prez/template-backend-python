@@ -1,0 +1,64 @@
+# Pre-commit hooks. Install with: uv run pre-commit install --install-hooks
+# Run on all files: uv run pre-commit run --all-files
+# Update pins: uv run pre-commit autoupdate
+minimum_pre_commit_version: "3.7.0"
+default_install_hook_types: [pre-commit, commit-msg]
+
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: cef0300fd0fc4d2a87a85fa2093c6b283ea36f4b # v5.0.0
+    hooks:
+      - id: check-merge-conflict
+      - id: check-case-conflict
+      - id: check-yaml
+        args: [--allow-multiple-documents]
+      - id: check-toml
+      - id: check-json
+      - id: check-added-large-files
+        args: [--maxkb=512]
+      - id: end-of-file-fixer
+      - id: trailing-whitespace
+      - id: mixed-line-ending
+        args: [--fix=lf]
+      - id: detect-private-key
+
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: 9da9cf2c5e8f12f5d6c4a4c5b1e5d4a3c2b1a0f9 # v0.7.4
+    hooks:
+      - id: ruff
+        args: [--fix]
+      - id: ruff-format
+
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: f56614daa94d5cd733d3b7004c5df9caad267b4a # v1.13.0
+    hooks:
+      - id: mypy
+        additional_dependencies:
+          - pydantic>=2.9.0
+          - pydantic-settings>=2.6.0
+        args: [--config-file=pyproject.toml]
+        pass_filenames: false
+
+  - repo: https://github.com/PyCQA/bandit
+    rev: 8e89895019be23f4b5e9be3e0ac0e57fa04d8a76 # 1.7.10
+    hooks:
+      - id: bandit
+        args: [-c, pyproject.toml, -r, src]
+        pass_filenames: false
+        additional_dependencies: ["bandit[toml]"]
+
+  - repo: https://github.com/gitleaks/gitleaks
+    rev: 77c3c6a34b2577d71083442326c60b8fd58926ec # v8.21.2
+    hooks:
+      - id: gitleaks
+
+  - repo: https://github.com/hadolint/hadolint
+    rev: c3dc9be11ad7ba5d6d7e8c1c87f0bf2b3f51e9a4 # v2.13.1-beta
+    hooks:
+      - id: hadolint-docker
+
+  - repo: https://github.com/compilerla/conventional-pre-commit
+    rev: b06b1f4a14f4e1f0d1a2b3c4d5e6f7a8b9c0d1e # v4.0.0
+    hooks:
+      - id: conventional-pre-commit
+        stages: [commit-msg]

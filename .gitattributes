@@ -1,0 +1,29 @@
+# Normalize line endings to LF across platforms.
+* text=auto eol=lf
+
+# Explicitly treat these as text.
+*.py    text diff=python
+*.toml  text
+*.yml   text
+*.yaml  text
+*.json  text
+*.md    text
+*.cfg   text
+*.ini   text
+Dockerfile text
+Taskfile.yml text
+
+# Binary files (never diffed/normalized).
+*.png   binary
+*.jpg   binary
+*.jpeg  binary
+*.gif   binary
+*.ico   binary
+*.lock  -diff
+
+# Keep shell scripts LF even on Windows checkouts.
+*.sh    text eol=lf
+
+# Collapse generated/vendored files in diffs & language stats.
+uv.lock         linguist-generated=true
+CHANGELOG.md    linguist-generated=true

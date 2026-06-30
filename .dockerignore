@@ -1,0 +1,46 @@
+# Keep the build context small and free of secrets / local cruft.
+.git
+.github
+.gitignore
+.gitattributes
+.editorconfig
+
+# Python caches & artifacts
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+coverage.xml
+htmlcov/
+.venv/
+venv/
+
+# Tooling / IDE / AI config
+.vscode/
+.cursor/
+.devcontainer/
+.idea/
+.pre-commit-config.yaml
+
+# Docs & meta (not needed at runtime)
+docs/
+*.md
+!README.md
+LICENSE
+CODEOWNERS
+
+# Tests are not shipped in the image
+tests/
+
+# Local env files & SBOM outputs
+.env
+.env.*
+sbom*.json
+sbom*.txt
+
+# OS files
+.DS_Store
+Thumbs.db

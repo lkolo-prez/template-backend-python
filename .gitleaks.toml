@@ -1,0 +1,20 @@
+# gitleaks configuration. Extends the bundled default ruleset.
+# Docs: https://github.com/gitleaks/gitleaks
+title = "template-backend-python gitleaks config"
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Global allowlist for known-safe test/example values."
+paths = [
+  '''(.*?)tests/.*''',
+  '''\.env\.example$''',
+]
+regexes = [
+  # Example/placeholder values used in docs and tests.
+  '''test-correlation-id''',
+  '''APP_[A-Z_]+=.*''',
+  # Example federated-credential subject in docs (no secret material).
+  '''repo:aircloud/template-backend-python:.*''',
+]

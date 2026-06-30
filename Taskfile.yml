@@ -1,0 +1,97 @@
+# Taskfile for template-backend-python.
+# Install Task: https://taskfile.dev/installation/
+# All targets assume `uv` is installed: https://docs.astral.sh/uv/
+version: "3"
+
+vars:
+  IMAGE: ghcr.io/aircloud/template-backend-python
+  PYTHON_VERSION: "3.12"
+
+env:
+  PYTHONUNBUFFERED: "1"
+
+tasks:
+  default:
+    desc: List available tasks.
+    cmds:
+      - task --list
+    silent: true
+
+  setup:
+    desc: Install all dependencies (locked) and pre-commit hooks.
+    cmds:
+      - uv sync --frozen --all-groups
+      - uv run pre-commit install --install-hooks
+
+  lint:
+    desc: Run ruff lint checks.
+    cmds:
+      - uv run ruff check .
+
+  format:
+    desc: Apply ruff formatting and import sorting.
+    cmds:
+      - uv run ruff format .
+      - uv run ruff check --fix .
+
+  format-check:
+    desc: Verify formatting without modifying files (CI gate).
+    cmds:
+      - uv run ruff format --check .
+      - uv run ruff check .
+
+  typecheck:
+    desc: Run mypy in strict mode.
+    cmds:
+      - uv run mypy
+
+  test:
+    desc: Run the test suite with coverage gate.
+    cmds:
+      - uv run pytest
+
+  security:
+    desc: Run bandit (SAST) and pip-audit (dependency CVEs).
+    cmds:
+      - uv run bandit -c pyproject.toml -r src
+      - uv run pip-audit
+
+  sbom:
+    desc: Generate a CycloneDX SBOM from the locked environment.
+    cmds:
+      - uv export --frozen --format requirements-txt --no-emit-project -o sbom-requirements.txt
+      - >-
+        docker run --rm -v "$PWD":/work -w /work
+        anchore/syft:latest scan file:sbom-requirements.txt
+        -o cyclonedx-json=sbom.cdx.json
+      - rm -f sbom-requirements.txt
+
+  build:
+    desc: Build the container image.
+    cmds:
+      - docker build -t {{.IMAGE}}:local .
+
+  run:
+    desc: Run the service locally with hot reload.
+    cmds:
+      - uv run uvicorn app.main:app --host 127.0.0.1 --port 8000 --reload
+
+  run-container:
+    desc: Run the built container locally.
+    deps: [build]
+    cmds:
+      - docker run --rm -p 8000:8000 --read-only --cap-drop ALL {{.IMAGE}}:local
+
+  all:
+    desc: Run the full local quality gate (lint, typecheck, test, security).
+    cmds:
+      - task: format-check
+      - task: typecheck
+      - task: test
+      - task: security
+
+  clean:
+    desc: Remove build, cache, and coverage artifacts.
+    cmds:
+      - rm -rf .pytest_cache .ruff_cache .mypy_cache htmlcov coverage.xml sbom.cdx.json
+      - find . -type d -name __pycache__ -prune -exec rm -rf {} +
