@@ -27,7 +27,7 @@ jobs:
       image: semgrep/semgrep@sha256:8f3c2a0b0a6e2c4a0d9b5e4f1c2a3b4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b
     steps:
       - name: Checkout
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
           persist-credentials: false
 
