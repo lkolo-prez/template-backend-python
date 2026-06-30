@@ -63,7 +63,7 @@ jobs:
       IMAGE: ghcr.io/aircloud/template-backend-python
     steps:
       - name: Harden the runner
-        uses: step-security/harden-runner@0080882f6c36860b6ba35c610c98ce87d4e2f26f # v2.10.2
+        uses: step-security/harden-runner@9af89fc71515a100421586dfdb3dc9c984fbf411 # v2.19.4
         with:
           egress-policy: audit
 
@@ -119,14 +119,14 @@ jobs:
         run: cosign sign --yes "${IMAGE}@${DIGEST}"
 
       - name: Generate SBOM (syft -> CycloneDX)
-        uses: anchore/sbom-action@9246b90769f852b3a8921f330c59e0b3f439d6e9 # v0.17.8
+        uses: anchore/sbom-action@e22c389904149dbc22b58101806040fa8d37a610 # v0.17.8
         with:
           image: ${{ env.IMAGE }}@${{ steps.build.outputs.digest }}
           format: cyclonedx-json
           output-file: sbom.cdx.json
 
       - name: Scan image with Trivy
-        uses: aquasecurity/trivy-action@18f2510ee396bbf400402947b394f2dd8c87dbb0 # v0.29.0
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
         with:
           image-ref: ${{ env.IMAGE }}@${{ steps.build.outputs.digest }}
           format: sarif
