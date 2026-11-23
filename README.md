@@ -1,8 +1,12 @@
+<p align="center">
+  <a href="https://aircloud.com.pl"><img src=".github/assets/banner.png" alt="AIRCLOUD: DevOps, cloud and AI engineering" width="100%"></a>
+</p>
+
 # template-backend-python
 
-[![CI](https://github.com/aircloud/template-backend-python/actions/workflows/ci.yml/badge.svg)](https://github.com/aircloud/template-backend-python/actions/workflows/ci.yml)
-[![CodeQL](https://github.com/aircloud/template-backend-python/actions/workflows/codeql.yml/badge.svg)](https://github.com/aircloud/template-backend-python/actions/workflows/codeql.yml)
-[![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/aircloud/template-backend-python/badge)](https://securityscorecards.dev/viewer/?uri=github.com/aircloud/template-backend-python)
+**Production-grade FastAPI microservice template with a hardened distroless image and supply-chain CI.**
+
+[![CI](https://github.com/lkolo-prez/template-backend-python/actions/workflows/ci.yml/badge.svg)](https://github.com/lkolo-prez/template-backend-python/actions/workflows/ci.yml)
 [![License: Apache-2.0](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](./LICENSE)
 
 A production-grade **FastAPI HTTP microservice** template for the `aircloud`
@@ -14,7 +18,7 @@ minutes.
 > (`ghcr.io/aircloud`), and Azure naming prefix (`aircloud`) are examples — see
 > [Customising](#customising-the-template) to replace them.
 
-## Features
+## What's inside
 
 - **FastAPI + Python 3.12**, async-first, typed end to end (`mypy --strict`).
 - **uv** for fast, reproducible dependency management (`uv.lock`).
@@ -33,7 +37,7 @@ minutes.
 - Conventional Commits + **release-please** automated releases.
 - AI-assistant configs: `CLAUDE.md`, `AGENTS.md`, Copilot, Cursor, dev container.
 
-## Architecture
+### Architecture
 
 ```text
 src/app/
@@ -52,7 +56,13 @@ src/app/
 
 See [`docs/ARCHITECTURE.md`](./docs/ARCHITECTURE.md) for diagrams and runbooks.
 
-## Quick start
+## Usage
+
+Create a new repository from this template (or use **Use this template** on GitHub):
+
+```bash
+gh repo create <your-org>/<name> --template lkolo-prez/template-backend-python --private --clone
+```
 
 Prerequisites: [`uv`](https://docs.astral.sh/uv/),
 [`Task`](https://taskfile.dev/), Docker (for container targets).
@@ -167,3 +177,22 @@ for the required ruleset (2 reviews, CODEOWNERS, signed commits, linear history)
 ## License
 
 [Apache-2.0](./LICENSE) © 2026 aircloud.
+
+---
+
+## Part of the AIRCLOUD golden path
+
+| Repository | What it is |
+| --- | --- |
+| [00-engineering-standards](https://github.com/lkolo-prez/00-engineering-standards) | Golden paths, security baseline, AI-assistant policy (handbook) |
+| [template-terraform-azure](https://github.com/lkolo-prez/template-terraform-azure) | Terraform on Azure: private AKS, Key Vault, ACR, OIDC, policy-as-code |
+| [template-gitops-argocd](https://github.com/lkolo-prez/template-gitops-argocd) | Argo CD, Kustomize, Argo Rollouts, Kyverno, External Secrets |
+| **template-backend-python** (this repo) | FastAPI, Python 3.12, uv, ruff, pytest |
+| [template-backend-go](https://github.com/lkolo-prez/template-backend-go) | Go 1.23, chi, slog, OpenTelemetry, golangci-lint |
+| [template-backend-typescript](https://github.com/lkolo-prez/template-backend-typescript) | Node 22, TypeScript, Fastify 5, Zod, Vitest, pnpm |
+| [template-frontend-nextjs](https://github.com/lkolo-prez/template-frontend-nextjs) | Next.js 15, React 19, Tailwind v4, Playwright, Lighthouse CI |
+| [.github](https://github.com/lkolo-prez/.github) | Reusable CI/CD workflows and community-health defaults |
+
+Terraform modules for Azure: [AIRCLOUD-PL](https://github.com/AIRCLOUD-PL).
+
+Built and maintained by [AIRCLOUD](https://aircloud.com.pl): DevOps, cloud and AI engineering. Need help adopting the golden path? See [aircloud.com.pl/consulting](https://aircloud.com.pl/consulting).
