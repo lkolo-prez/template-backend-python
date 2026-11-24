@@ -36,12 +36,8 @@ async def test_list_widgets_pagination(client: AsyncClient) -> None:
 
 
 async def test_update_widget(client: AsyncClient) -> None:
-    created = (
-        await client.post("/v1/widgets", json={"name": "Gizmo"})
-    ).json()
-    resp = await client.patch(
-        f"/v1/widgets/{created['id']}", json={"quantity": 5}
-    )
+    created = (await client.post("/v1/widgets", json={"name": "Gizmo"})).json()
+    resp = await client.patch(f"/v1/widgets/{created['id']}", json={"quantity": 5})
     assert resp.status_code == 200
     assert resp.json()["quantity"] == 5
     assert resp.json()["name"] == "Gizmo"
@@ -54,9 +50,7 @@ async def test_delete_widget(client: AsyncClient) -> None:
 
     missing = await client.get(f"/v1/widgets/{created['id']}")
     assert missing.status_code == 404
-    assert missing.headers["content-type"].startswith(
-        "application/problem+json"
-    )
+    assert missing.headers["content-type"].startswith("application/problem+json")
 
 
 async def test_get_unknown_widget_returns_problem_json(
@@ -80,7 +74,5 @@ async def test_validation_error_returns_422(client: AsyncClient) -> None:
 
 
 async def test_extra_field_rejected(client: AsyncClient) -> None:
-    resp = await client.post(
-        "/v1/widgets", json={"name": "ok", "rogue": "field"}
-    )
+    resp = await client.post("/v1/widgets", json={"name": "ok", "rogue": "field"})
     assert resp.status_code == 422

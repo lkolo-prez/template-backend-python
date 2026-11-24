@@ -66,9 +66,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.state.settings = settings
 
     # Middleware (order matters: last added runs outermost).
-    app.add_middleware(
-        SecurityHeadersMiddleware, enable_hsts=settings.is_production
-    )
+    app.add_middleware(SecurityHeadersMiddleware, enable_hsts=settings.is_production)
     app.add_middleware(RequestIdMiddleware)
     if settings.cors_allow_origins:
         app.add_middleware(

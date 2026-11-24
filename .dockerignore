@@ -28,6 +28,8 @@ venv/
 # Docs & meta (not needed at runtime)
 docs/
 *.md
+# pyproject.toml declares README.md as the package readme (needed to build).
+!README.md
 !README.md
 LICENSE
 CODEOWNERS

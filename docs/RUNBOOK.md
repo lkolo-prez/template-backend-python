@@ -10,7 +10,7 @@ the template.
 | Property            | Value                                                      |
 | ------------------- | ---------------------------------------------------------- |
 | Runtime             | Python 3.12, FastAPI, ASGI via `uvicorn app.main:app`      |
-| Container           | `gcr.io/distroless/python3-debian12:nonroot` (uid `65532`) |
+| Container           | `gcr.io/distroless/cc-debian12:nonroot` + bundled CPython 3.12 (uid `65532`) |
 | Image               | `ghcr.io/aircloud/template-backend-python`                 |
 | Listen port         | `8000` (container `APP_HOST=0.0.0.0`)                       |
 | Workers             | 1 per container; scale horizontally via replicas           |

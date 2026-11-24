@@ -7,50 +7,63 @@ on:
   pull_request:
     branches: [main]
   workflow_dispatch:
+  # Called by release.yml to publish a release-please tag.
+  workflow_call:
+    inputs:
+      tag:
+        description: Release tag to publish (e.g. v1.2.3); empty for branch builds.
+        type: string
+        required: false
+        default: ""
 
 permissions:
   contents: read
 
 concurrency:
-  group: container-${{ github.ref }}
+  # github.workflow is the caller's name under workflow_call, so a release
+  # publish never cancels (or is cancelled by) a regular push build.
+  group: container-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
   # ------------------------------------------------------------------------- #
-  # Preferred path: delegate to the org reusable workflow which builds, scans #
-  # (Trivy), generates an SBOM (syft -> CycloneDX), pushes to GHCR, signs the #
-  # image keylessly with cosign, and attaches SLSA build provenance.          #
-  # The reusable workflow centralises supply-chain policy across all repos.    #
+  # Org-level alternative (not used): the reusable workflow below lives in     #
+  # aircloud/.github, which this repository cannot reach, so the job failed    #
+  # to resolve. It is kept here, commented out, as a reference for adopters.   #
   # ------------------------------------------------------------------------- #
-  build-and-publish:
-    name: Build, scan, sign, attest
-    permissions:
-      contents: read
-      packages: write        # push image to GHCR
-      id-token: write        # OIDC for cosign keyless signing
-      attestations: write    # build-provenance attestation
-      security-events: write # upload Trivy SARIF
-    uses: aircloud/.github/.github/workflows/reusable-container.yml@7c3e9a1d2f6b8c0a4e5d7f9b1c2a3e4d5f6a7b8c # v1.4.0
-    with:
-      image: ghcr.io/aircloud/template-backend-python
-      dockerfile: Dockerfile
-      context: .
-      platforms: linux/amd64,linux/arm64
-      # Only push/sign on main and tags; PRs build for validation only.
-      push: ${{ github.event_name != 'pull_request' }}
-      cosign-sign: true
-      generate-sbom: true
-      trivy-scan: true
-      provenance: true
+  # # ------------------------------------------------------------------------- #
+  # # Preferred path: delegate to the org reusable workflow which builds, scans #
+  # # (Trivy), generates an SBOM (syft -> CycloneDX), pushes to GHCR, signs the #
+  # # image keylessly with cosign, and attaches SLSA build provenance.          #
+  # # The reusable workflow centralises supply-chain policy across all repos.    #
+  # # ------------------------------------------------------------------------- #
+  # build-and-publish:
+  #   name: Build, scan, sign, attest
+  #   permissions:
+  #     contents: read
+  #     packages: write        # push image to GHCR
+  #     id-token: write        # OIDC for cosign keyless signing
+  #     attestations: write    # build-provenance attestation
+  #     security-events: write # upload Trivy SARIF
+  #   uses: aircloud/.github/.github/workflows/reusable-container.yml@7c3e9a1d2f6b8c0a4e5d7f9b1c2a3e4d5f6a7b8c # v1.4.0
+  #   with:
+  #     image: ghcr.io/aircloud/template-backend-python
+  #     dockerfile: Dockerfile
+  #     context: .
+  #     platforms: linux/amd64,linux/arm64
+  #     # Only push/sign on main and tags; PRs build for validation only.
+  #     push: ${{ github.event_name != 'pull_request' }}
+  #     cosign-sign: true
+  #     generate-sbom: true
+  #     trivy-scan: true
+  #     provenance: true
 
   # ------------------------------------------------------------------------- #
-  # Self-contained fallback shown for transparency. Disabled by default; it    #
-  # documents exactly what the reusable workflow does, so this template is     #
-  # readable even without access to aircloud/.github. Flip `if:` to run it.    #
+  # Self-contained build: build, scan (Trivy), SBOM (syft -> CycloneDX), push  #
+  # to GHCR, keyless cosign signature and SLSA build provenance.               #
   # ------------------------------------------------------------------------- #
   build-inline:
-    name: Build inline (reference, disabled)
-    if: ${{ false }}
+    name: Build, scan, sign, attest
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     permissions:
@@ -60,7 +73,7 @@ jobs:
       attestations: write
       security-events: write
     env:
-      IMAGE: ghcr.io/aircloud/template-backend-python
+      IMAGE: ghcr.io/${{ github.repository }}
     steps:
       - name: Harden the runner
         uses: step-security/harden-runner@0080882f6c36860b6ba35c610c98ce87d4e2f26f # v2.10.2
@@ -94,6 +107,7 @@ jobs:
             type=ref,event=branch
             type=semver,pattern={{version}}
             type=sha,format=long
+            type=semver,pattern={{version}},value=${{ inputs.tag }},enable=${{ inputs.tag != '' }}
 
       - name: Build and push
         id: build
@@ -119,6 +133,8 @@ jobs:
         run: cosign sign --yes "${IMAGE}@${DIGEST}"
 
       - name: Generate SBOM (syft -> CycloneDX)
+        # The digest only exists in the registry when the image was pushed.
+        if: ${{ github.event_name != 'pull_request' }}
         uses: anchore/sbom-action@9246b90769f852b3a8921f330c59e0b3f439d6e9 # v0.17.8
         with:
           image: ${{ env.IMAGE }}@${{ steps.build.outputs.digest }}
@@ -126,7 +142,8 @@ jobs:
           output-file: sbom.cdx.json
 
       - name: Scan image with Trivy
-        uses: aquasecurity/trivy-action@18f2510ee396bbf400402947b394f2dd8c87dbb0 # v0.29.0
+        if: ${{ github.event_name != 'pull_request' }}
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
         with:
           image-ref: ${{ env.IMAGE }}@${{ steps.build.outputs.digest }}
           format: sarif
@@ -136,7 +153,7 @@ jobs:
           ignore-unfixed: true
 
       - name: Upload Trivy SARIF
-        if: always()
+        if: ${{ !cancelled() && hashFiles('trivy-results.sarif') != '' }}
         uses: github/codeql-action/upload-sarif@df409f7d9260372bd5f19e5b04e83cb3c43714ae # v3.27.9
         with:
           sarif_file: trivy-results.sarif

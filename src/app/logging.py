@@ -12,7 +12,7 @@ import sys
 
 import structlog
 from structlog.contextvars import merge_contextvars
-from structlog.types import Processor
+from structlog.types import FilteringBoundLogger, Processor
 
 from app.config import Settings
 
@@ -29,7 +29,6 @@ def configure_logging(settings: Settings) -> None:
         merge_contextvars,
         structlog.processors.add_log_level,
         structlog.processors.TimeStamper(fmt="iso", utc=True),
-        structlog.stdlib.add_logger_name,
         structlog.processors.StackInfoRenderer(),
         structlog.processors.format_exc_info,
     ]
@@ -51,7 +50,9 @@ def configure_logging(settings: Settings) -> None:
     handler = logging.StreamHandler(sys.stdout)
     handler.setFormatter(
         structlog.stdlib.ProcessorFormatter(
-            foreign_pre_chain=shared_processors,
+            # stdlib records carry a logger name; structlog's PrintLogger does
+            # not, so add_logger_name only runs on the stdlib bridge.
+            foreign_pre_chain=[*shared_processors, structlog.stdlib.add_logger_name],
             processors=[
                 structlog.stdlib.ProcessorFormatter.remove_processors_meta,
                 renderer,
@@ -68,10 +69,13 @@ def configure_logging(settings: Settings) -> None:
         logging.getLogger(noisy).propagate = True
 
 
-def get_logger(name: str | None = None) -> structlog.stdlib.BoundLogger:
-    """Return a bound structlog logger.
+def get_logger(name: str | None = None) -> FilteringBoundLogger:
+    """Return a lazily-bound structlog logger.
 
     Args:
-        name: Optional logger name; defaults to the calling module's logger.
+        name: Optional logger name, emitted as the ``logger_name`` key on every record.
     """
-    return structlog.get_logger(name)
+    logger: FilteringBoundLogger = (
+        structlog.get_logger(logger_name=name) if name else structlog.get_logger()
+    )
+    return logger

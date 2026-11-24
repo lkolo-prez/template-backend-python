@@ -42,7 +42,5 @@ def app(settings: Settings):
 async def client(app) -> AsyncIterator[AsyncClient]:
     """Yield an AsyncClient wired to the in-process ASGI app."""
     transport = ASGITransport(app=app)
-    async with AsyncClient(
-        transport=transport, base_url="http://testserver"
-    ) as ac:
+    async with AsyncClient(transport=transport, base_url="http://testserver") as ac:
         yield ac

@@ -42,7 +42,8 @@ jobs:
           manifest-file: .release-please-manifest.json
 
   # When release-please cuts a tag, this job builds and publishes the release
-  # artifacts via the org reusable container workflow (signed + attested).
+  # image via this repository's container workflow (signed + attested). Tags
+  # created with GITHUB_TOKEN do not trigger other workflows, hence the call.
   publish:
     name: Publish release image
     needs: release-please
@@ -53,15 +54,6 @@ jobs:
       id-token: write
       attestations: write
       security-events: write
-    uses: aircloud/.github/.github/workflows/reusable-container.yml@7c3e9a1d2f6b8c0a4e5d7f9b1c2a3e4d5f6a7b8c # v1.4.0
+    uses: ./.github/workflows/container.yml
     with:
-      image: ghcr.io/aircloud/template-backend-python
-      dockerfile: Dockerfile
-      context: .
-      platforms: linux/amd64,linux/arm64
-      push: true
-      cosign-sign: true
-      generate-sbom: true
-      trivy-scan: true
-      provenance: true
       tag: ${{ needs.release-please.outputs.tag_name }}

@@ -2,9 +2,9 @@
 
 Two distinct probes following Kubernetes conventions:
 
-* ``/health/live``  – liveness: is the process up and able to serve? Always
+* ``/health/live``  - liveness: is the process up and able to serve? Always
   cheap; never depends on downstream systems.
-* ``/health/ready`` – readiness: is the service ready to receive traffic? This
+* ``/health/ready`` - readiness: is the service ready to receive traffic? This
   is where dependency checks (DB, cache, upstream APIs) belong.
 """
 

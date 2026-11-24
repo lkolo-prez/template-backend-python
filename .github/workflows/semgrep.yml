@@ -24,7 +24,7 @@ jobs:
       contents: read
       security-events: write   # upload SARIF
     container:
-      image: semgrep/semgrep@sha256:8f3c2a0b0a6e2c4a0d9b5e4f1c2a3b4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b
+      image: semgrep/semgrep:1.186.0@sha256:6e1b04340e60e910fbb4ddbf3c857ab0918f064417ad5ac530014ccb3cf8c8f1
     steps:
       - name: Checkout
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2

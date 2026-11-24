@@ -169,7 +169,7 @@ graph LR
   traffic is routed. Extend the `checks` dict with real probes (DB, cache,
   upstreams).
 
-The service runs as non-root uid `65532` on `gcr.io/distroless/python3-debian12`
+The service runs as non-root uid `65532` on `gcr.io/distroless/cc-debian12` (with a bundled uv-managed CPython 3.12)
 via the multi-stage `Dockerfile`, served by `uvicorn app.main:app` (one worker
 per container; scale horizontally via replicas).
 

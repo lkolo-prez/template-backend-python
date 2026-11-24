@@ -30,6 +30,7 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
     """Apply baseline security response headers."""
 
     def __init__(self, app: object, *, enable_hsts: bool = False) -> None:
+        """Wrap ``app``; emit HSTS only when ``enable_hsts`` is true."""
         super().__init__(app)  # type: ignore[arg-type]
         self._enable_hsts = enable_hsts
 
@@ -38,6 +39,7 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
         request: Request,
         call_next: Callable[[Request], Awaitable[Response]],
     ) -> Response:
+        """Add the security headers to every response."""
         response = await call_next(request)
         for header, value in _SECURITY_HEADERS.items():
             response.headers.setdefault(header, value)

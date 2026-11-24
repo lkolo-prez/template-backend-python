@@ -55,9 +55,7 @@ def configure_telemetry(app: FastAPI, settings: Settings) -> None:
     trace.set_tracer_provider(provider)
 
     # excluded_urls keeps liveness/readiness probes out of the trace stream.
-    FastAPIInstrumentor.instrument_app(
-        app, excluded_urls="health/live,health/ready"
-    )
+    FastAPIInstrumentor.instrument_app(app, excluded_urls="health/live,health/ready")
     HTTPXClientInstrumentor().instrument()
 
     _log.info(

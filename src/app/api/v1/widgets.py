@@ -73,19 +73,23 @@ class WidgetRepository:
     """In-memory widget store. Not safe for multi-process deployments."""
 
     def __init__(self) -> None:
+        """Create an empty store."""
         self._store: dict[uuid.UUID, Widget] = {}
 
     def list(self, *, limit: int, offset: int) -> tuple[list[Widget], int]:
+        """Return one page of widgets (oldest first) and the total count."""
         items = sorted(self._store.values(), key=lambda w: w.created_at)
         return items[offset : offset + limit], len(items)
 
     def get(self, widget_id: uuid.UUID) -> Widget:
+        """Return a widget or raise ``NotFoundError``."""
         try:
             return self._store[widget_id]
         except KeyError as exc:
             raise NotFoundError(f"Widget {widget_id} not found.") from exc
 
     def create(self, data: WidgetCreate) -> Widget:
+        """Persist a new widget and return it."""
         now = datetime.now(UTC)
         widget = Widget(
             id=uuid.uuid4(),
@@ -97,15 +101,15 @@ class WidgetRepository:
         return widget
 
     def update(self, widget_id: uuid.UUID, data: WidgetUpdate) -> Widget:
+        """Apply a partial update to an existing widget and return it."""
         current = self.get(widget_id)
         patch = data.model_dump(exclude_unset=True)
-        updated = current.model_copy(
-            update={**patch, "updated_at": datetime.now(UTC)}
-        )
+        updated = current.model_copy(update={**patch, "updated_at": datetime.now(UTC)})
         self._store[widget_id] = updated
         return updated
 
     def delete(self, widget_id: uuid.UUID) -> None:
+        """Remove a widget or raise ``NotFoundError``."""
         if widget_id not in self._store:
             raise NotFoundError(f"Widget {widget_id} not found.")
         del self._store[widget_id]

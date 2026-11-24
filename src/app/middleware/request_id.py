@@ -26,6 +26,7 @@ class RequestIdMiddleware(BaseHTTPMiddleware):
         request: Request,
         call_next: Callable[[Request], Awaitable[Response]],
     ) -> Response:
+        """Attach the request ID to the log context and the response header."""
         incoming = request.headers.get(REQUEST_ID_HEADER)
         request_id = incoming or uuid.uuid4().hex
 

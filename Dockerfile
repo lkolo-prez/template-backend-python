@@ -8,23 +8,29 @@
 # ---------------------------------------------------------------------------
 
 # Pin the uv tooling image to a digest in production; tag shown for clarity.
-ARG UV_VERSION=0.5.11
+ARG UV_VERSION=0.13.9
 ARG PYTHON_VERSION=3.12
 
 # --------------------------------------------------------------------------- #
 # Stage 1: builder                                                            #
 # --------------------------------------------------------------------------- #
 FROM ghcr.io/astral-sh/uv:${UV_VERSION} AS uv
-FROM python:${PYTHON_VERSION}-slim-bookworm AS builder
+FROM debian:bookworm-slim AS builder
+ARG PYTHON_VERSION
 
 # uv configuration: copy mode (works across the layer boundary into runtime),
-# compile bytecode for faster cold starts, and use the system-managed python.
+# compile bytecode for faster cold starts, and a uv-managed (standalone) CPython
+# installed under /opt/python. The distroless python3-debian12 image ships
+# Python 3.11, so the interpreter travels with the venv instead.
 ENV UV_LINK_MODE=copy \
     UV_COMPILE_BYTECODE=1 \
-    UV_PYTHON_DOWNLOADS=never \
+    UV_PYTHON_PREFERENCE=only-managed \
+    UV_PYTHON_INSTALL_DIR=/opt/python \
+    UV_PYTHON=${PYTHON_VERSION} \
     UV_PROJECT_ENVIRONMENT=/opt/venv
 
 COPY --from=uv /uv /usr/local/bin/uv
+RUN uv python install "${PYTHON_VERSION}"
 
 WORKDIR /app
 
@@ -35,6 +41,7 @@ RUN --mount=type=cache,target=/root/.cache/uv \
     uv sync --frozen --no-dev --no-install-project
 
 # Now add the source and install the project itself into the venv.
+COPY README.md ./
 COPY src ./src
 RUN --mount=type=cache,target=/root/.cache/uv \
     uv sync --frozen --no-dev --no-editable
@@ -42,7 +49,7 @@ RUN --mount=type=cache,target=/root/.cache/uv \
 # --------------------------------------------------------------------------- #
 # Stage 2: runtime (distroless, non-root)                                     #
 # --------------------------------------------------------------------------- #
-FROM gcr.io/distroless/python3-debian12:nonroot AS runtime
+FROM gcr.io/distroless/cc-debian12:nonroot AS runtime
 
 # OCI labels for provenance & discoverability.
 LABEL org.opencontainers.image.title="template-backend-python" \
@@ -60,6 +67,7 @@ ENV PATH="/opt/venv/bin:${PATH}" \
 WORKDIR /app
 
 # Copy the fully-built virtualenv and the application source.
+COPY --from=builder /opt/python /opt/python
 COPY --from=builder /opt/venv /opt/venv
 COPY --from=builder /app/src /app/src
 

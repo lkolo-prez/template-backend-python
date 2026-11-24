@@ -44,7 +44,7 @@ class Settings(BaseSettings):
     )
 
     # HTTP server ---------------------------------------------------------
-    host: str = Field(default="0.0.0.0", description="Bind address.")  # noqa: S104
+    host: str = Field(default="0.0.0.0", description="Bind address.")  # noqa: S104  # nosec B104
     port: int = Field(default=8000, ge=1, le=65535, description="Bind port.")
     root_path: str = Field(
         default="",

@@ -28,6 +28,7 @@ class AppError(Exception):
     title: str = "Internal Server Error"
 
     def __init__(self, detail: str | None = None) -> None:
+        """Create the error with an optional client-facing detail message."""
         self.detail = detail or self.title
         super().__init__(self.detail)
 
@@ -112,9 +113,7 @@ def register_exception_handlers(app: FastAPI) -> None:
         )
 
     @app.exception_handler(Exception)
-    async def _handle_unexpected(
-        request: Request, exc: Exception
-    ) -> JSONResponse:
+    async def _handle_unexpected(request: Request, exc: Exception) -> JSONResponse:
         # Log the full exception server-side; never return details to clients.
         _log.error("request.unhandled_error", exc_info=exc)
         return _problem(
