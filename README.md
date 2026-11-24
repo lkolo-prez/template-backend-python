@@ -115,7 +115,7 @@ task build          # docker build -t ghcr.io/aircloud/template-backend-python:l
 task run-container   # runs read-only, cap-drop ALL
 ```
 
-The image runs as non-root uid `65532` on `gcr.io/distroless/cc-debian12` (with a bundled uv-managed CPython 3.12),
+The image runs as non-root uid `65532` on `gcr.io/distroless/cc-debian13` (with a bundled uv-managed CPython 3.12),
 exposes `8000`, and includes a `HEALTHCHECK` hitting `/health/live`.
 
 ## CI / CD & supply chain

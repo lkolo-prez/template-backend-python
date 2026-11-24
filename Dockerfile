@@ -30,7 +30,11 @@ ENV UV_LINK_MODE=copy \
     UV_PROJECT_ENVIRONMENT=/opt/venv
 
 COPY --from=uv /uv /usr/local/bin/uv
-RUN uv python install "${PYTHON_VERSION}"
+# The runtime never installs packages, so drop the interpreter's bundled pip
+# (its vendored SBOM otherwise surfaces stale CVEs in image scans).
+RUN uv python install "${PYTHON_VERSION}" \
+    && rm -rf /opt/python/cpython-*/lib/python*/site-packages/pip \
+              /opt/python/cpython-*/lib/python*/site-packages/pip-*.dist-info
 
 WORKDIR /app
 
@@ -49,7 +53,9 @@ RUN --mount=type=cache,target=/root/.cache/uv \
 # --------------------------------------------------------------------------- #
 # Stage 2: runtime (distroless, non-root)                                     #
 # --------------------------------------------------------------------------- #
-FROM gcr.io/distroless/cc-debian12:nonroot AS runtime
+# cc (glibc + libgcc) is what the uv-managed CPython needs; debian13 tracks
+# current OpenSSL fixes (debian12's libssl3 lags behind in distroless).
+FROM gcr.io/distroless/cc-debian13:nonroot AS runtime
 
 # OCI labels for provenance & discoverability.
 LABEL org.opencontainers.image.title="template-backend-python" \
