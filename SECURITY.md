@@ -18,9 +18,9 @@ discussions, or pull requests.**
 
 Report privately via **GitHub Security Advisories**:
 
-> <https://github.com/aircloud/template-backend-python/security/advisories/new>
+> <https://github.com/lkolo-prez/template-backend-python/security/advisories/new>
 
-If you cannot use GitHub advisories, email **security@aircloud.com.pl** with the
+If you cannot use GitHub advisories, email **office@aircloud.com.pl** with the
 subject `SECURITY: template-backend-python` and, if possible, encrypt sensitive
 details using the key referenced in our [`security.txt`](#securitytxt).
 
